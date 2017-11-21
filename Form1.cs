@@ -25,6 +25,8 @@ namespace asgn5v1
         double[,] vertices;
         double[,] scrnpts;
         double[,] ctrans = new double[4, 4];//your main transformation matrix
+        double unitGrid = 20.0; // Given assumption: 20x20 grid 
+        double scaleFactor;
         private System.Windows.Forms.ImageList tbimages;
         private System.Windows.Forms.ToolBar toolBar1;
         private System.Windows.Forms.ToolBarButton transleftbtn;
@@ -358,6 +360,8 @@ namespace asgn5v1
                     grfx.DrawLine(pen, (int)scrnpts[lines[i, 0], 0], (int)scrnpts[lines[i, 0], 1],
                         (int)scrnpts[lines[i, 1], 0], (int)scrnpts[lines[i, 1], 1]);
                 }
+                Console.WriteLine("screenpoints[0,0] = " + scrnpts[0, 0]);
+                Console.WriteLine("screenpoints[0,1] = " + scrnpts[0, 1]);
 
 
             } // end of gooddata block	
@@ -493,8 +497,8 @@ namespace asgn5v1
          */
         public void initObject(ref double[,] A)
         {
-            var unitGrid = 20; // Given assumption: 20x20 grid 
-            var scaleFactor = (this.Height / 2) / unitGrid; // Scaling vert height equal to half of screen height
+            
+            scaleFactor = (this.Height / 2) / unitGrid; // Scaling vert height equal to half of screen height
             var rotate180 = new double[4, 4];
             A[0, 0] = scaleFactor; // Sets scaling for x
             A[1, 1] = scaleFactor; // Sets scaling for y
@@ -508,7 +512,7 @@ namespace asgn5v1
             A = MultiplyMatrix(A, rotate180); // Rotates to proper orientation
             A[3, 0] = (this.Width / 2) + (unitGrid * scaleFactor / 2); // Translates to center width (half screen + half obj width)
             A[3, 1] = (this.Height / 2) - (unitGrid * scaleFactor / 2); // Translates to center width (half screen - half obj height)
-        }// end of setIdentity
+        }
 
         public double[,] MultiplyMatrix(double[,] a, double[,] b)
         {
@@ -587,10 +591,49 @@ namespace asgn5v1
             }
             if (e.Button == scaleupbtn)
             {
+                
+                Double[,] scaleUp = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(scaleUp, 4, 4);
+
+                scaleUp[0, 0] = 1.1;
+                scaleUp[1, 1] = 1.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, scaleUp);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
             if (e.Button == scaledownbtn)
             {
+                Double[,] scaleDown = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(scaleDown, 4, 4);
+
+                scaleDown[0, 0] = 0.9;
+                scaleDown[1, 1] = 0.9;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, scaleDown);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
             if (e.Button == rotxby1btn)
