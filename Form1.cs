@@ -499,6 +499,7 @@ namespace asgn5v1
             A[0, 0] = scaleFactor; // Sets scaling for x
             A[1, 1] = scaleFactor; // Sets scaling for y
             // Create rotation matrix for 180 degree rotation
+            setIdentity(rotate180, 4, 4);
             rotate180[0, 0] = 0;
             rotate180[1, 0] = -1;
             rotate180[0, 1] = 1;
@@ -512,7 +513,7 @@ namespace asgn5v1
         public double[,] MultiplyMatrix(double[,] a, double[,] b)
         {
             int rA = a.GetLength(0);
-            int cA = b.GetLength(1);
+            int cA = a.GetLength(1);
             int rB = b.GetLength(0);
             int cB = b.GetLength(1);
             double temp = 0;
@@ -549,19 +550,39 @@ namespace asgn5v1
         {
             if (e.Button == transleftbtn)
             {
+                // Translate left by 75 pixels
+                Double[,] transLeft = new double[4, 4];
+                setIdentity(transLeft, 4, 4);
+                transLeft[3, 0] = -75;
+                ctrans = MultiplyMatrix(ctrans, transLeft);
                 Refresh();
             }
             if (e.Button == transrightbtn)
             {
+                // Translate right by 75 pixels
+                Double[,] transRight = new double[4, 4];
+                setIdentity(transRight, 4, 4);
+                transRight[3, 0] = 75;
+                ctrans = MultiplyMatrix(ctrans, transRight);
                 Refresh();
             }
             if (e.Button == transupbtn)
             {
+                // Translate up by 35 pixels\
+                Double[,] transUp = new double[4, 4];
+                setIdentity(transUp, 4, 4);
+                transUp[3, 1] = -35; // Y value increases downwards
+                ctrans = MultiplyMatrix(ctrans, transUp);
                 Refresh();
             }
 
             if (e.Button == transdownbtn)
             {
+                // Translate down by 35 pixels
+                Double[,] transDown = new double[4, 4];
+                setIdentity(transDown, 4, 4);
+                transDown[3, 1] = 35; // Y value decreases upward
+                ctrans = MultiplyMatrix(ctrans, transDown);
                 Refresh();
             }
             if (e.Button == scaleupbtn)

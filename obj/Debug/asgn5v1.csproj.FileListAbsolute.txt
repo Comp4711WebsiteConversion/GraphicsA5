@@ -15,3 +15,12 @@ C:\FourthTerm\Comp 4560\asgn5student\obj\Debug\asgn5v1.csproj.GenerateResource.C
 C:\FourthTerm\Comp 4560\asgn5student\obj\Debug\asgn5v1.csproj.CoreCompileInputs.cache
 C:\FourthTerm\Comp 4560\asgn5student\obj\Debug\asgn5v1.exe
 C:\FourthTerm\Comp 4560\asgn5student\obj\Debug\asgn5v1.pdb
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\bin\Debug\asgn5v1.exe
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\bin\Debug\asgn5v1.pdb
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.csprojResolveAssemblyReference.cache
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.AboutDialogBox.resources
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.Transformer.resources
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.csproj.GenerateResource.Cache
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.csproj.CoreCompileInputs.cache
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.exe
+D:\Term 4\4560 - Graphics\Assignments\Assignment 5\GraphicsA5\obj\Debug\asgn5v1.pdb
