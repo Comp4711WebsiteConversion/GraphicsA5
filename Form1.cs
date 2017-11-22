@@ -66,7 +66,7 @@ namespace asgn5v1
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.DoubleBuffer, true);
-            Text = "COMP 4560:  Assignment 5 (200830) (Your Name Here)";
+            Text = "COMP 4560:  Assignment 5 (Connor Jang a00874888) (Clinton Bock a00957172)";
             ResizeRedraw = true;
             BackColor = Color.Black;
             MenuItem miNewDat = new MenuItem("New &Data...",
@@ -390,6 +390,8 @@ namespace asgn5v1
 
         void RestoreInitialImage()
         {
+            setIdentity(ctrans, 4, 4);
+            initObject(ref ctrans);
             Invalidate();
         } // end of RestoreInitialImage
 
@@ -873,11 +875,53 @@ namespace asgn5v1
 
             if (e.Button == shearleftbtn)
             {
+                Double[,] shearLeft = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(shearLeft, 4, 4);
+
+                
+                shearLeft[1, 0] = 0.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1] - ((unitGrid/2) *scaleFactor);
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1] + ((unitGrid / 2) * scaleFactor);
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, shearLeft);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
 
             if (e.Button == shearrightbtn)
             {
+                Double[,] shearRight = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(shearRight, 4, 4);
+
+
+                shearRight[1, 0] = -0.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1] - ((unitGrid / 2) * scaleFactor);
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1] + ((unitGrid / 2) * scaleFactor);
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, shearRight);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
 
@@ -888,7 +932,7 @@ namespace asgn5v1
 
             if (e.Button == exitbtn)
             {
-                Close();
+                this.Close();
             }
 
         }
