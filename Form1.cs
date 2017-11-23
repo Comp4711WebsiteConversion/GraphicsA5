@@ -25,6 +25,9 @@ namespace asgn5v1
         double[,] vertices;
         double[,] scrnpts;
         double[,] ctrans = new double[4, 4];//your main transformation matrix
+        double unitGrid = 20.0; // Given assumption: 20x20 grid 
+        double scaleFactor;
+        bool rotating = false;
         private System.Windows.Forms.ImageList tbimages;
         private System.Windows.Forms.ToolBar toolBar1;
         private System.Windows.Forms.ToolBarButton transleftbtn;
@@ -63,7 +66,7 @@ namespace asgn5v1
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
             this.SetStyle(ControlStyles.DoubleBuffer, true);
-            Text = "COMP 4560:  Assignment 5 (200830) (Your Name Here)";
+            Text = "COMP 4560:  Assignment 5 (Connor Jang a00874888) (Clinton Bock a00957172)";
             ResizeRedraw = true;
             BackColor = Color.Black;
             MenuItem miNewDat = new MenuItem("New &Data...",
@@ -358,6 +361,10 @@ namespace asgn5v1
                     grfx.DrawLine(pen, (int)scrnpts[lines[i, 0], 0], (int)scrnpts[lines[i, 0], 1],
                         (int)scrnpts[lines[i, 1], 0], (int)scrnpts[lines[i, 1], 1]);
                 }
+                Console.WriteLine("screenpoints[0,0] = " + scrnpts[0, 0]);
+                Console.WriteLine("screenpoints[0,1] = " + scrnpts[0, 1]);
+                Console.WriteLine("screenpoints[0,2] = " + scrnpts[0, 2]);
+
 
 
             } // end of gooddata block	
@@ -383,6 +390,8 @@ namespace asgn5v1
 
         void RestoreInitialImage()
         {
+            setIdentity(ctrans, 4, 4);
+            initObject(ref ctrans);
             Invalidate();
         } // end of RestoreInitialImage
 
@@ -493,13 +502,15 @@ namespace asgn5v1
          */
         public void initObject(ref double[,] A)
         {
-            var unitGrid = 20; // Given assumption: 20x20 grid 
-            var scaleFactor = (this.Height / 2) / unitGrid; // Scaling vert height equal to half of screen height
+            
+            scaleFactor = (this.Height / 2) / unitGrid; // Scaling vert height equal to half of screen height
             var rotate180 = new double[4, 4];
             A[0, 0] = scaleFactor; // Sets scaling for x
             A[1, 1] = scaleFactor; // Sets scaling for y
-            // Create rotation matrix for 180 degree rotation
+            A[2, 2] = scaleFactor; // Sets Scaling for z
+            
             setIdentity(rotate180, 4, 4);
+            // Create rotation matrix for 180 degree rotation
             rotate180[0, 0] = 0;
             rotate180[1, 0] = -1;
             rotate180[0, 1] = 1;
@@ -508,7 +519,7 @@ namespace asgn5v1
             A = MultiplyMatrix(A, rotate180); // Rotates to proper orientation
             A[3, 0] = (this.Width / 2) + (unitGrid * scaleFactor / 2); // Translates to center width (half screen + half obj width)
             A[3, 1] = (this.Height / 2) - (unitGrid * scaleFactor / 2); // Translates to center width (half screen - half obj height)
-        }// end of setIdentity
+        }
 
         public double[,] MultiplyMatrix(double[,] a, double[,] b)
         {
@@ -587,46 +598,330 @@ namespace asgn5v1
             }
             if (e.Button == scaleupbtn)
             {
+                
+                Double[,] scaleUp = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(scaleUp, 4, 4);
+
+                scaleUp[0, 0] = 1.1;
+                scaleUp[1, 1] = 1.1;
+                scaleUp[2, 2] = 1.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, scaleUp);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
             if (e.Button == scaledownbtn)
             {
+                Double[,] scaleDown = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(scaleDown, 4, 4);
+
+                scaleDown[0, 0] = 0.9;
+                scaleDown[1, 1] = 0.9;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, scaleDown);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
             if (e.Button == rotxby1btn)
-            {
+            {  // Rotate Y by 0.05 radians
+                double angle = 0.05;
+                Double[,] rotation = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(rotation, 4, 4);
+
+                rotation[1, 1] = Math.Cos(angle);
+                rotation[2, 1] = Math.Sin(angle);
+                rotation[1, 2] = -Math.Sin(angle);
+                rotation[2, 2] = Math.Cos(angle);
+
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, rotation);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
+                Refresh();
 
             }
             if (e.Button == rotyby1btn)
-            {
+            {// Rotate Y by 0.05 radians
+                double angle = 0.05;
+                Double[,] rotation = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(rotation, 4, 4);
+
+                rotation[0, 0] = Math.Cos(angle);
+                rotation[2, 0] = -Math.Sin(angle);
+                rotation[0, 2] = Math.Sin(angle);
+                rotation[2, 2] = Math.Cos(angle);
+
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, rotation);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
+                Refresh();
 
             }
             if (e.Button == rotzby1btn)
-            {
+            {   // Rotations by 0.05 radians
+                double angle = 0.05;
+                Double[,] rotation = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(rotation, 4, 4);
+
+                rotation[0, 0] = Math.Cos(angle);
+                rotation[1, 0] = -Math.Sin(angle);
+                rotation[0, 1] = Math.Sin(angle);
+                rotation[1, 1] = Math.Cos(angle);
+
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1];
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1];
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, rotation);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
+                Refresh();
 
             }
 
             if (e.Button == rotxbtn)
             {
+                if(!rotating)
+                {
+                    rotating = true;
+                } else
+                {
+                    rotating = false;
+                }
+                while(rotating) {
+                    double angle = 0.05;
+                    Double[,] rotation = new double[4, 4];
+                    Double[,] transToOrigin = new double[4, 4];
+                    Double[,] transBack = new double[4, 4];
+
+                    setIdentity(transBack, 4, 4);
+                    setIdentity(transToOrigin, 4, 4);
+                    setIdentity(rotation, 4, 4);
+
+                    rotation[1, 1] = Math.Cos(angle);
+                    rotation[2, 1] = Math.Sin(angle);
+                    rotation[1, 2] = -Math.Sin(angle);
+                    rotation[2, 2] = Math.Cos(angle);
+
+                    transToOrigin[3, 0] = -scrnpts[0, 0];
+                    transToOrigin[3, 1] = -scrnpts[0, 1];
+                    transToOrigin[3, 2] = -scrnpts[0, 2];
+                    transBack[3, 0] = scrnpts[0, 0];
+                    transBack[3, 1] = scrnpts[0, 1];
+                    transBack[3, 2] = scrnpts[0, 2];
+
+                    ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                    ctrans = MultiplyMatrix(ctrans, rotation);
+                    ctrans = MultiplyMatrix(ctrans, transBack);
+
+                    Refresh();
+                    //slow down rotation
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
+                
 
             }
             if (e.Button == rotybtn)
             {
+                if (!rotating)
+                {
+                    rotating = true;
+                }
+                else
+                {
+                    rotating = false;
+                }
+                while (rotating)
+                {
+                    double angle = 0.05;
+                    Double[,] rotation = new double[4, 4];
+                    Double[,] transToOrigin = new double[4, 4];
+                    Double[,] transBack = new double[4, 4];
+
+                    setIdentity(transBack, 4, 4);
+                    setIdentity(transToOrigin, 4, 4);
+                    setIdentity(rotation, 4, 4);
+
+                    rotation[0, 0] = Math.Cos(angle);
+                    rotation[2, 0] = -Math.Sin(angle);
+                    rotation[0, 2] = Math.Sin(angle);
+                    rotation[2, 2] = Math.Cos(angle);
+
+                    transToOrigin[3, 0] = -scrnpts[0, 0];
+                    transToOrigin[3, 1] = -scrnpts[0, 1];
+                    transToOrigin[3, 2] = -scrnpts[0, 2];
+                    transBack[3, 0] = scrnpts[0, 0];
+                    transBack[3, 1] = scrnpts[0, 1];
+                    transBack[3, 2] = scrnpts[0, 2];
+
+                    ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                    ctrans = MultiplyMatrix(ctrans, rotation);
+                    ctrans = MultiplyMatrix(ctrans, transBack);
+
+                    Refresh();
+                    //slow down rotation
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
 
             }
 
             if (e.Button == rotzbtn)
             {
+                if (!rotating)
+                {
+                    rotating = true;
+                }
+                else
+                {
+                    rotating = false;
+                }
+                while (rotating)
+                {
+                    // Rotations by 0.05 radians
+                    double angle = 0.05;
+                    Double[,] rotation = new double[4, 4];
+                    Double[,] transToOrigin = new double[4, 4];
+                    Double[,] transBack = new double[4, 4];
 
+                    setIdentity(transBack, 4, 4);
+                    setIdentity(transToOrigin, 4, 4);
+                    setIdentity(rotation, 4, 4);
+
+                    rotation[0, 0] = Math.Cos(angle);
+                    rotation[1, 0] = -Math.Sin(angle);
+                    rotation[0, 1] = Math.Sin(angle);
+                    rotation[1, 1] = Math.Cos(angle);
+
+                    transToOrigin[3, 0] = -scrnpts[0, 0];
+                    transToOrigin[3, 1] = -scrnpts[0, 1];
+                    transToOrigin[3, 2] = -scrnpts[0, 2];
+                    transBack[3, 0] = scrnpts[0, 0];
+                    transBack[3, 1] = scrnpts[0, 1];
+                    transBack[3, 2] = scrnpts[0, 2];
+
+                    ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                    ctrans = MultiplyMatrix(ctrans, rotation);
+                    ctrans = MultiplyMatrix(ctrans, transBack);
+
+                    Refresh();
+                    //slow down rotation
+                    System.Threading.Thread.Sleep(100);
+                    Application.DoEvents();
+                }
             }
 
             if (e.Button == shearleftbtn)
             {
+                Double[,] shearLeft = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(shearLeft, 4, 4);
+
+                
+                shearLeft[1, 0] = 0.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1] - ((unitGrid/2) *scaleFactor);
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1] + ((unitGrid / 2) * scaleFactor);
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, shearLeft);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
 
             if (e.Button == shearrightbtn)
             {
+                Double[,] shearRight = new double[4, 4];
+                Double[,] transToOrigin = new double[4, 4];
+                Double[,] transBack = new double[4, 4];
+
+                setIdentity(transBack, 4, 4);
+                setIdentity(transToOrigin, 4, 4);
+                setIdentity(shearRight, 4, 4);
+
+
+                shearRight[1, 0] = -0.1;
+                transToOrigin[3, 0] = -scrnpts[0, 0];
+                transToOrigin[3, 1] = -scrnpts[0, 1] - ((unitGrid / 2) * scaleFactor);
+                transToOrigin[3, 2] = -scrnpts[0, 2];
+                transBack[3, 0] = scrnpts[0, 0];
+                transBack[3, 1] = scrnpts[0, 1] + ((unitGrid / 2) * scaleFactor);
+                transBack[3, 2] = scrnpts[0, 2];
+
+                ctrans = MultiplyMatrix(ctrans, transToOrigin);
+                ctrans = MultiplyMatrix(ctrans, shearRight);
+                ctrans = MultiplyMatrix(ctrans, transBack);
+
                 Refresh();
             }
 
@@ -637,7 +932,7 @@ namespace asgn5v1
 
             if (e.Button == exitbtn)
             {
-                Close();
+                this.Close();
             }
 
         }
